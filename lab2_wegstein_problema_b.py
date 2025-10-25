@@ -51,9 +51,10 @@ def _fmt_res(r: float) -> str:
 
 
 def format_table_row(method: str, root: float, fval: float, iters: int, converged: bool) -> str:
+    """Linhas da tabela: se não convergir, mostra '—' em f e |F|."""
     status = "✓" if converged else "✗"
-    root_s = _fmt_num(root)
-    fval_s = _fmt_res(fval)
+    root_s = _fmt_num(root) if converged else f"{'—':>12}"
+    fval_s = _fmt_res(fval) if converged else f"{'—':>12}"
     return f"{method:15} | {root_s} | {fval_s} | {iters:4d} | {status}"
 
 
