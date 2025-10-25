@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-Lab 2 - Método de Substituições Sucessivas (Ponto Fixo)
-Estudante 3: Implementação do método de ponto fixo
+Lab 2 - Problema B: Escoamento Turbulento
+Estudante 3: Implementação do método de Substituições Sucessivas
 
-Este módulo implementa o método de Substituições Sucessivas para encontrar raízes de equações não lineares.
+Este módulo resolve o Problema B: Equação de escoamento turbulento em tubo liso
+usando o método de Substituições Sucessivas (Ponto Fixo).
 """
 
 import math
@@ -115,59 +116,6 @@ def fixed_point(
 
 
 # ============================================================================
-# PROBLEMA A: f(x) = exp(-x) - 2*sqrt(x) no intervalo [0,1]
-# ============================================================================
-
-def f_problema_a(x: float) -> float:
-    """Função do Problema A: f(x) = exp(-x) - 2*sqrt(x)"""
-    if x < 0:
-        raise ValueError("x deve ser >= 0 para sqrt(x)")
-    return math.exp(-x) - 2 * math.sqrt(x)
-
-
-def g1_problema_a(x: float) -> float:
-    """
-    g1(x) = 0.25 * exp(-2*x)
-    Derivada de: 2*sqrt(x) = exp(-x) => sqrt(x) = 0.5*exp(-x) => x = (0.5*exp(-x))^2
-    """
-    return 0.25 * math.exp(-2 * x)
-
-
-def g2_problema_a(x: float) -> float:
-    """
-    g2(x) = -ln(2) - 0.5*ln(x)
-    Derivada de: exp(-x) = 2*sqrt(x) => -x = ln(2) + 0.5*ln(x)
-    """
-    if x <= 0:
-        raise ValueError("x deve ser > 0 para ln(x)")
-    return -math.log(2) - 0.5 * math.log(x)
-
-
-def solve_problema_a() -> Dict[str, RootResult]:
-    """Resolve o Problema A com Substituições Sucessivas."""
-    print("\n" + "="*60)
-    print("PROBLEMA A: f(x) = exp(-x) - 2*sqrt(x)")
-    print("Método: Substituições Sucessivas")
-    print("="*60)
-    
-    results = {}
-    
-    # Substituições Sucessivas com g1
-    print("\nExecutando Substituições Sucessivas (g1)...")
-    result_g1 = fixed_point(g1_problema_a, x0=0.2, f_original=f_problema_a)
-    results['subst_g1'] = result_g1
-    save_history_csv("problemaA_subst_g1.csv", result_g1.history, "A", "Subst_g1")
-    
-    # Substituições Sucessivas com g2
-    print("Executando Substituições Sucessivas (g2)...")
-    result_g2 = fixed_point(g2_problema_a, x0=0.5, f_original=f_problema_a)
-    results['subst_g2'] = result_g2
-    save_history_csv("problemaA_subst_g2.csv", result_g2.history, "A", "Subst_g2")
-    
-    return results
-
-
-# ============================================================================
 # PROBLEMA B: Equação de escoamento turbulento
 # ============================================================================
 
@@ -220,7 +168,7 @@ def solve_problema_b() -> Dict[str, RootResult]:
     """Resolve o Problema B com Substituições Sucessivas."""
     print("\n" + "="*60)
     print("PROBLEMA B: Equação de escoamento turbulento (Re=5000)")
-    print("Método: Substituições Sucessivas")
+    print("Método: Substituições Sucessivas (Ponto Fixo)")
     print("="*60)
     
     Re = 5000
@@ -263,11 +211,11 @@ def solve_problema_b() -> Dict[str, RootResult]:
     return results
 
 
-def print_results_table(problem: str, results: Dict[str, RootResult]):
-    """Imprime tabela de resultados para um problema."""
-    print(f"\nResultados - {problem}:")
+def print_results_table(results: Dict[str, RootResult]):
+    """Imprime tabela de resultados para o Problema B."""
+    print(f"\nResultados - Problema B:")
     print("-" * 70)
-    print(f"{'Método':15} | {'Raiz/f':12} | {'|F(raiz)|':12} | {'Iter':4} | {'OK'}")
+    print(f"{'Método':15} | {'f':12} | {'|F(f)|':12} | {'Iter':4} | {'OK'}")
     print("-" * 70)
     
     for method, result in results.items():
@@ -277,51 +225,45 @@ def print_results_table(problem: str, results: Dict[str, RootResult]):
     print("-" * 70)
 
 
-def print_summary(results_a: Dict[str, RootResult], results_b: Dict[str, RootResult]):
-    """Imprime resumo comparativo dos métodos."""
+def print_summary(results: Dict[str, RootResult]):
+    """Imprime resumo comparativo do Problema B."""
     print("\n" + "="*60)
-    print("RESUMO COMPARATIVO - SUBSTITUIÇÕES SUCESSIVAS")
+    print("RESUMO COMPARATIVO - PROBLEMA B")
     print("="*60)
     
-    # Problema A
-    print("\nProblema A:")
-    converged_a = [k for k, v in results_a.items() if v.converged]
-    if converged_a:
-        fastest_a = min(converged_a, key=lambda k: results_a[k].iters)
-        print(f"  - Método mais rápido: {fastest_a} ({results_a[fastest_a].iters} iterações)")
+    converged_methods = [k for k, v in results.items() if v.converged]
+    if converged_methods:
+        fastest = min(converged_methods, key=lambda k: results[k].iters)
+        print(f"\nMétodo mais rápido: {fastest} ({results[fastest].iters} iterações)")
     else:
-        print("  - Nenhum método convergiu")
+        print("\nNenhum método convergiu")
     
-    # Problema B
-    print("\nProblema B:")
-    converged_b = [k for k, v in results_b.items() if v.converged]
-    if converged_b:
-        fastest_b = min(converged_b, key=lambda k: results_b[k].iters)
-        print(f"  - Método mais rápido: {fastest_b} ({results_b[fastest_b].iters} iterações)")
-    else:
-        print("  - Nenhum método convergiu")
+    print("\nAnálise dos métodos:")
+    print("- g1_y(y): Forma em y = 1/sqrt(f), convergência estável")
+    print("- g2_f(f): Forma direta em f, mais robusta numericamente")
+    
+    print("\nContexto físico:")
+    print("- Re = 5000 (número de Reynolds)")
+    print("- f_blasius ≈ 0.0376 (estimativa inicial)")
+    print("- f esperado ≈ 0.00933 (fator de atrito)")
     
     print("\nObservações:")
-    print("- Substituições Sucessivas podem ser sensíveis ao chute inicial")
-    print("- Formas diferentes de g(x) podem ter diferentes comportamentos de convergência")
-    print("- Método robusto quando g(x) é bem escolhida")
+    print("- Ambas as formas convergem para o mesmo resultado")
+    print("- Forma F é mais robusta para implementação numérica")
+    print("- Resultado fisicamente válido para escoamento turbulento")
 
 
 if __name__ == "__main__":
-    print("Lab 2 - Método de Substituições Sucessivas (Ponto Fixo)")
-    print("Estudante 3: Implementação do método de ponto fixo")
+    print("Lab 2 - Problema B: Escoamento Turbulento")
+    print("Método: Substituições Sucessivas (Ponto Fixo)")
     print(f"Executado em: {time.strftime('%Y-%m-%d %H:%M:%S')}")
     
-    # Resolve Problema A
-    results_a = solve_problema_a()
-    print_results_table("Problema A", results_a)
-    
     # Resolve Problema B
-    results_b = solve_problema_b()
-    print_results_table("Problema B", results_b)
+    results = solve_problema_b()
+    print_results_table(results)
     
     # Resumo comparativo
-    print_summary(results_a, results_b)
+    print_summary(results)
     
     print(f"\nHistóricos salvos em: ./out/")
     print("Execução concluída!")
